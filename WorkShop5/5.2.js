@@ -9,12 +9,20 @@ let students = [
     { id: 3, name: "javascript", age: 20 }
 ];
 
-//GET ทั้งหมด
+function validateStudent(req, res, next) {
+    const { name, age } = req.body;
+
+    if (!name || !age) {
+        return res.status(400).json({ message: "Invalid data" });
+    }
+
+    next();
+}
+
 app.get('/api/students', (req, res) => {
     res.json(students);
 });
 
-//GET ตาม id
 app.get('/api/students/:id', (req, res) => {
     const id = parseInt(req.params.id);
     const student = students.find(s => s.id === id);
@@ -26,34 +34,34 @@ app.get('/api/students/:id', (req, res) => {
     res.json(student);
 });
 
-//post เพิ่มนักเรียนใหม่
-app.post('/api/students', (req, res) => {
-    const { name, age } = req.body;
+app.post('/api/students', validateStudent, (req, res) => {
 
     const newStudent = {
         id: students.length + 1,
-        name,
-        age
+        name: req.body.name,
+        age: req.body.age
     };
 
     students.push(newStudent);
+
     res.status(201).json(newStudent);
 });
 
-//PUT แก้ไขข้อมูลนักเรียน ตาม id
-app.put('/api/students/:id', (req, res) => {
+app.put('/api/students/:id', validateStudent, (req, res) => {
+
     const id = parseInt(req.params.id);
     const student = students.find(s => s.id === id);
 
     if (!student) {
         return res.status(404).json({ message: "Student not found" });
     }
+
     student.name = req.body.name;
     student.age = req.body.age;
+
     res.json(student);
 });
 
-//DELETE ลบข้อมูลนักเรียน ตาม id
 app.delete('/api/students/:id', (req, res) => {
     const id = parseInt(req.params.id);
     const index = students.findIndex(s => s.id === id);
@@ -61,6 +69,7 @@ app.delete('/api/students/:id', (req, res) => {
     if (index === -1) {
         return res.status(404).json({ message: "Student not found" });
     }
+
     const deleted = students.splice(index, 1);
     res.json(deleted);
 });
