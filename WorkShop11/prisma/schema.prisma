@@ -21,3 +21,5 @@ model Order {
   quantity  Int      @default(1)
   userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
